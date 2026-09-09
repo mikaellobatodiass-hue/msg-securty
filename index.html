@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mensagens Secretas</title>
+<script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+<style>
+  :root {
+    --fundo: #0a0e1a;
+    --fundo2: #10162a;
+    --painel: #131b31;
+    --painel2: #1a2340;
+    --borda: #232d4d;
+    --texto: #e7ebf5;
+    --texto-fraco: #8b93ab;
+    --verde: #22c55e;
+    --verde-fundo: linear-gradient(135deg, #3ecf6e 0%, #1f9950 100%);
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background: var(--fundo);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    color: var(--texto);
+    display: flex;
+    justify-content: center;
+    padding: 48px 20px 60px;
+  }
+
+  .pagina { width: 100%; max-width: 620px; }
+
+  .marca {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 32px;
+  }
+
+  .marca .icone {
+    width: 46px;
+    height: 46px;
+    border-radius: 12px;
+    background: var(--verde-fundo);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    box-shadow: 0 6px 16px rgba(34, 197, 94, 0.25);
+  }
+
+  .marca .nome { font-size: 15px; font-weight: 600; }
+  .marca .nome span { display: block; font-size: 12px; font-weight: 400; color: var(--texto-fraco); margin-top: 1px; }
+
+  h1 { font-size: 38px; line-height: 1.15; margin: 0 0 14px; font-weight: 400; letter-spacing: -0.5px; }
+  h1 strong { font-weight: 800; color: var(--verde); }
+
+  .subtitulo { color: var(--texto-fraco); font-size: 15px; line-height: 1.6; max-width: 48ch; margin: 0 0 28px; }
+
+  .tela-sala {
+    background: var(--painel);
+    border: 1px solid var(--borda);
+    border-radius: 16px;
+    padding: 28px 26px;
+  }
+
+  .campo { margin-bottom: 16px; }
+
+  .campo label { display: block; font-size: 12.5px; font-weight: 600; color: var(--texto-fraco); margin-bottom: 8px; }
+
+  input[type="text"] {
+    width: 100%;
+    background: var(--painel2);
+    border: 1px solid var(--borda);
+    border-radius: 10px;
+    padding: 12px 14px;
+    font-family: inherit;
+    font-size: 14.5px;
+    color: var(--texto);
+  }
+
+  input[type="text"]::placeholder { color: #5a6280; }
+  input[type="text"]:focus { outline: none; border-color: var(--verde); box-shadow: 0 0 0 3px rgba(34,197,94,0.15); }
+
+  button.acao {
+    width: 100%;
+    background: var(--verde-fundo);
+    color: #06210f;
+    border: none;
+    padding: 14px;
+    font-family: inherit;
+    font-size: 14.5px;
+    font-weight: 700;
+    border-radius: 10px;
+    cursor: pointer;
+  }
+
+  button.acao:hover { filter: brightness(1.08); }
+
+  .dica-sala { font-size: 12.5px; color: var(--texto-fraco); margin-top: 12px; line-height: 1.5; }
+
+  .tela-chat { display: none; }
+  .tela-chat.mostrar { display: block; }
+  .tela-sala.esconder { display: none; }
+
+  .barra-status {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+  }
+
+  .barra-status .sala-atual { font-size: 13px; color: var(--texto-fraco); }
+  .barra-status .sala-atual b { color: var(--texto); }
+
+  .bolinha-status {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: #f59e0b; display: inline-block; margin-right: 6px;
+  }
+
+  .bolinha-status.online { background: var(--verde); }
+
+  .btn-sair {
+    background: transparent; border: 1px solid var(--borda); color: var(--texto-fraco);
+    font-size: 12px; padding: 6px 12px; border-radius: 8px; cursor: pointer; font-family: inherit;
+  }
+
+  .caixa-chat {
+    background: var(--fundo2);
+    border: 1px solid var(--borda);
+    border-radius: 14px;
+    height: 420px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .lista-msgs {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .aviso-topo {
+    align-self: center;
+    background: #1a2340;
+    color: var(--texto-fraco);
+    font-size: 11.5px;
+    padding: 6px 12px;
+    border-radius: 8px;
+    margin-bottom: 8px;
+    text-align: center;
+    max-width: 90%;
+  }
+
+  .linha-msg { display: flex; flex-direction: column; margin-bottom: 2px; }
+  .linha-msg.propria { align-items: flex-end; }
+  .linha-msg.outra { align-items: flex-start; }
+
+  .bolha {
+    max-width: 78%;
+    padding: 8px 11px;
+    border-radius: 10px;
+    font-size: 14px;
+    line-height: 1.4;
+    word-break: break-word;
+    white-space: pre-wrap;
+  }
+
+  .propria .bolha { background: var(--verde-fundo); color: #06210f; border-bottom-right-radius: 3px; }
+  .outra .bolha { background: var(--painel2); color: var(--texto); border-bottom-left-radius: 3px; border: 1px solid var(--borda); }
+
+  .contagem { font-size: 10px; color: var(--texto-fraco); margin-top: 2px; }
+
+  .barra-input {
+    display: flex;
+    align-items: flex-end;
+    gap: 8px;
+    padding: 10px;
+    border-top: 1px solid var(--borda);
+  }
+
+  .barra-input textarea {
+    flex: 1;
+    border: 1px solid var(--borda);
+    border-radius: 20px;
+    padding: 9px 14px;
+    font-size: 14px;
+    font-family: inherit;
+    resize: none;
+    max-height: 80px;
+    background: var(--painel2);
+    color: var(--texto);
+  }
+
+  .barra-input textarea:focus { outline: none; border-color: var(--verde); }
+
+  .btn-enviar {
+    width: 38px; height: 38px; border-radius: 50%;
+    background: var(--verde-fundo); border: none; color: #06210f;
+    font-size: 16px; cursor: pointer; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+  }
+</style>
+</head>
+<body>
+<div class="pagina">
+
+  <div class="marca">
+    <div class="icone">🔥</div>
+    <div class="nome">Workspace<span>Mensagens Secretas</span></div>
+  </div>
+
+  <h1>Uma <strong>sala</strong> só<br>sua e dela.</h1>
+  <p class="subtitulo">Combinem o nome de uma sala. Quem entrar com o mesmo nome vê as mensagens em tempo real — e elas somem sozinhas 15 segundos depois de aparecer.</p>
+
+  <div class="tela-sala" id="tela-sala">
+    <div class="campo">
+      <label>NOME DA SALA</label>
+      <input type="text" id="nome-sala" placeholder="ex: girassol-secreto">
+    </div>
+    <div class="campo">
+      <label>SEU NOME (só pra você reconhecer suas msgs)</label>
+      <input type="text" id="meu-nome" placeholder="ex: Déborah">
+    </div>
+    <button class="acao" onclick="entrarNaSala()">Entrar na sala</button>
+    <p class="dica-sala">As duas precisam digitar exatamente o mesmo nome de sala pra caírem na mesma conversa.</p>
+  </div>
+
+  <div class="tela-chat" id="tela-chat">
+    <div class="barra-status">
+      <span class="sala-atual"><span class="bolinha-status" id="bolinha-status"></span>sala: <b id="rotulo-sala"></b></span>
+      <button class="btn-sair" onclick="sairDaSala()">Trocar de sala</button>
+    </div>
+    <div class="caixa-chat">
+      <div class="lista-msgs" id="lista-msgs">
+        <div class="aviso-topo">Mensagens somem 15s depois de aparecer pra quem tá vendo.</div>
+      </div>
+      <div class="barra-input">
+        <textarea id="campo-texto" rows="1" placeholder="Digite sua mensagem..."></textarea>
+        <button class="btn-enviar" onclick="enviarMsg()">➤</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  let cliente = null;
+  let idSessao = Math.random().toString(36).slice(2, 8);
+  let meuNome = '';
+  let salaAtual = '';
+
+  function entrarNaSala() {
+    const sala = document.getElementById('nome-sala').value.trim();
+    const nome = document.getElementById('meu-nome').value.trim();
+    if (!sala || !nome) {
+      alert('Preencha o nome da sala e o seu nome.');
+      return;
+    }
+    meuNome = nome;
+    salaAtual = sala;
+
+    document.getElementById('rotulo-sala').textContent = sala;
+    document.getElementById('tela-sala').classList.add('esconder');
+    document.getElementById('tela-chat').classList.add('mostrar');
+
+    conectar();
+  }
+
+  function sairDaSala() {
+    if (cliente) { cliente.end(true); cliente = null; }
+    document.getElementById('tela-chat').classList.remove('mostrar');
+    document.getElementById('tela-sala').classList.remove('esconder');
+    document.getElementById('lista-msgs').innerHTML = '<div class="aviso-topo">Mensagens somem 15s depois de aparecer pra quem tá vendo.</div>';
+    atualizarStatus(false);
+  }
+
+  function atualizarStatus(online) {
+    document.getElementById('bolinha-status').classList.toggle('online', online);
+  }
+
+  function conectar() {
+    atualizarStatus(false);
+    const topico = 'igreen-mensagens-secretas/' + encodeURIComponent(salaAtual);
+    cliente = mqtt.connect('wss://broker.emqx.io:8084/mqtt', {
+      clientId: 'ms_' + idSessao + '_' + Date.now(),
+      clean: true,
+      reconnectPeriod: 2000
+    });
+
+    cliente.on('connect', () => {
+      atualizarStatus(true);
+      cliente.subscribe(topico);
+    });
+
+    cliente.on('reconnect', () => atualizarStatus(false));
+    cliente.on('close', () => atualizarStatus(false));
+
+    cliente.on('message', (topicoRecebido, payload) => {
+      try {
+        const dados = JSON.parse(payload.toString());
+        if (dados.sessao === idSessao) return;
+        adicionarBolha(dados.texto, 'outra', dados.nome);
+      } catch (e) {}
+    });
+  }
+
+  function horaAtual() {
+    const d = new Date();
+    return d.getHours().toString().padStart(2,'0') + ':' + d.getMinutes().toString().padStart(2,'0');
+  }
+
+  function adicionarBolha(texto, lado, nomeRemetente) {
+    const lista = document.getElementById('lista-msgs');
+
+    const linha = document.createElement('div');
+    linha.className = 'linha-msg ' + lado;
+
+    const bolha = document.createElement('div');
+    bolha.className = 'bolha';
+    bolha.textContent = (lado === 'outra' && nomeRemetente ? nomeRemetente + ': ' : '') + texto;
+
+    linha.appendChild(bolha);
+
+    const contagem = document.createElement('div');
+    contagem.className = 'contagem';
+    contagem.textContent = 'some em 15s';
+    linha.appendChild(contagem);
+
+    lista.appendChild(linha);
+    lista.scrollTop = lista.scrollHeight;
+
+    let restante = 15;
+    const timer = setInterval(() => {
+      restante -= 1;
+      if (restante > 0) {
+        contagem.textContent = 'some em ' + restante + 's';
+      } else {
+        clearInterval(timer);
+        linha.style.transition = 'opacity 0.5s ease';
+        linha.style.opacity = '0';
+        setTimeout(() => linha.remove(), 500);
+      }
+    }, 1000);
+  }
+
+  function enviarMsg() {
+    const campo = document.getElementById('campo-texto');
+    const valor = campo.value.trim();
+    if (!valor || !cliente) return;
+
+    const topico = 'igreen-mensagens-secretas/' + encodeURIComponent(salaAtual);
+    cliente.publish(topico, JSON.stringify({ texto: valor, nome: meuNome, sessao: idSessao }));
+    adicionarBolha(valor, 'propria', null);
+
+    campo.value = '';
+    campo.style.height = 'auto';
+  }
+
+  document.getElementById('campo-texto').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); enviarMsg(); }
+  });
+
+  document.getElementById('campo-texto').addEventListener('input', function() {
+    this.style.height = 'auto';
+    this.style.height = Math.min(this.scrollHeight, 80) + 'px';
+  });
+</script>
+</body>
+</html>
