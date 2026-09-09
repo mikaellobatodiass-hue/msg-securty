@@ -7,15 +7,15 @@
 <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
 <style>
   :root {
-    --fundo: #0a0e1a;
-    --fundo2: #10162a;
-    --painel: #131b31;
-    --painel2: #1a2340;
-    --borda: #232d4d;
-    --texto: #e7ebf5;
-    --texto-fraco: #8b93ab;
-    --verde: #22c55e;
-    --verde-fundo: linear-gradient(135deg, #3ecf6e 0%, #1f9950 100%);
+    --fundo: #0b0b0d;
+    --fundo2: #000000;
+    --painel: #111113;
+    --painel2: #1c1c1f;
+    --borda: #2a2a2e;
+    --texto: #f2f2f3;
+    --texto-fraco: #8a8d93;
+    --acento: #3b82f6;
+    --acento-fundo: linear-gradient(135deg, #60a5fa 0%, #2563eb 100%);
   }
 
   * { box-sizing: border-box; }
@@ -31,7 +31,7 @@
     padding: 48px 20px 60px;
   }
 
-  .pagina { width: 100%; max-width: 620px; }
+  .pagina { width: 100%; max-width: 1040px; }
 
   .marca {
     display: flex;
@@ -44,23 +44,20 @@
     width: 46px;
     height: 46px;
     border-radius: 12px;
-    background: var(--verde-fundo);
+    background: var(--acento-fundo);
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 22px;
-    box-shadow: 0 6px 16px rgba(34, 197, 94, 0.25);
+    box-shadow: 0 6px 16px rgba(37, 99, 235, 0.3);
   }
 
   .marca .nome { font-size: 15px; font-weight: 600; }
   .marca .nome span { display: block; font-size: 12px; font-weight: 400; color: var(--texto-fraco); margin-top: 1px; }
 
-  h1 { font-size: 38px; line-height: 1.15; margin: 0 0 14px; font-weight: 400; letter-spacing: -0.5px; }
-  h1 strong { font-weight: 800; color: var(--verde); }
-
-  .subtitulo { color: var(--texto-fraco); font-size: 15px; line-height: 1.6; max-width: 48ch; margin: 0 0 28px; }
-
   .tela-sala {
+    max-width: 420px;
+    margin: 130px auto 0;
     background: var(--painel);
     border: 1px solid var(--borda);
     border-radius: 16px;
@@ -83,12 +80,12 @@
   }
 
   input[type="text"]::placeholder { color: #5a6280; }
-  input[type="text"]:focus { outline: none; border-color: var(--verde); box-shadow: 0 0 0 3px rgba(34,197,94,0.15); }
+  input[type="text"]:focus { outline: none; border-color: var(--acento); box-shadow: 0 0 0 3px rgba(59,130,246,0.2); }
 
   button.acao {
     width: 100%;
-    background: var(--verde-fundo);
-    color: #06210f;
+    background: var(--acento-fundo);
+    color: #ffffff;
     border: none;
     padding: 14px;
     font-family: inherit;
@@ -102,41 +99,137 @@
 
   .dica-sala { font-size: 12.5px; color: var(--texto-fraco); margin-top: 12px; line-height: 1.5; }
 
-  .tela-chat { display: none; }
-  .tela-chat.mostrar { display: block; }
   .tela-sala.esconder { display: none; }
 
-  .barra-status {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 14px;
-  }
-
-  .barra-status .sala-atual { font-size: 13px; color: var(--texto-fraco); }
-  .barra-status .sala-atual b { color: var(--texto); }
-
-  .bolinha-status {
-    width: 8px; height: 8px; border-radius: 50%;
-    background: #f59e0b; display: inline-block; margin-right: 6px;
-  }
-
-  .bolinha-status.online { background: var(--verde); }
-
-  .btn-sair {
-    background: transparent; border: 1px solid var(--borda); color: var(--texto-fraco);
-    font-size: 12px; padding: 6px 12px; border-radius: 8px; cursor: pointer; font-family: inherit;
-  }
-
-  .caixa-chat {
-    background: var(--fundo2);
+  .app {
+    display: none;
+    height: 640px;
+    max-height: 80vh;
+    background: var(--painel);
     border: 1px solid var(--borda);
-    border-radius: 14px;
-    height: 420px;
-    display: flex;
-    flex-direction: column;
+    border-radius: 16px;
     overflow: hidden;
   }
+
+  .app.mostrar { display: flex; }
+
+  .avatar {
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    color: #ffffff;
+    flex-shrink: 0;
+  }
+
+  .nav-lateral {
+    width: 64px;
+    flex-shrink: 0;
+    background: var(--fundo2);
+    border-right: 1px solid var(--borda);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    padding: 18px 0;
+  }
+
+  .nav-icones, .nav-rodape { display: flex; flex-direction: column; align-items: center; gap: 18px; }
+
+  .nav-icone {
+    width: 38px; height: 38px;
+    border-radius: 10px;
+    background: transparent;
+    border: none;
+    color: var(--texto-fraco);
+    font-size: 17px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  .nav-icone:hover { background: var(--painel2); }
+  .nav-icone.ativo { background: var(--painel2); color: var(--acento); }
+
+  .nav-avatar { width: 34px; height: 34px; font-size: 13px; cursor: pointer; }
+
+  .coluna-contatos {
+    width: 300px;
+    flex-shrink: 0;
+    background: var(--painel);
+    border-right: 1px solid var(--borda);
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  .cabecalho-contatos {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 16px 12px;
+  }
+
+  .cabecalho-contatos h2 { font-size: 16px; margin: 0; }
+
+  .icone-topo { background: transparent; border: none; color: var(--texto-fraco); font-size: 16px; cursor: pointer; padding: 4px; }
+  .icone-topo:hover { color: var(--texto); }
+
+  .busca-contatos { padding: 0 16px 12px; }
+
+  .busca-contatos input {
+    border-radius: 20px;
+    padding: 8px 14px;
+    font-size: 13px;
+  }
+
+  .lista-participantes { flex: 1; overflow-y: auto; }
+
+  .item-participante {
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px 16px;
+    cursor: pointer;
+    border-bottom: 1px solid rgba(255,255,255,0.03);
+  }
+
+  .item-participante:hover { background: var(--painel2); }
+  .item-participante.ativo { background: var(--painel2); }
+
+  .item-participante .avatar { width: 42px; height: 42px; font-size: 14px; }
+
+  .texto-participante { min-width: 0; flex: 1; }
+
+  .texto-participante .nome-participante {
+    font-size: 14px; font-weight: 600;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+
+  .texto-participante .ultima-msg {
+    font-size: 12.5px; color: var(--texto-fraco); margin-top: 2px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+
+  .vazio-participantes { padding: 24px 16px; font-size: 13px; color: var(--texto-fraco); text-align: center; }
+
+  .coluna-chat {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    background: var(--fundo2);
+  }
+
+  .cabecalho-chat {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 20px;
+    border-bottom: 1px solid var(--borda);
+  }
+
+  .info-cabecalho { display: flex; align-items: center; gap: 12px; min-width: 0; }
+  .info-cabecalho .avatar { width: 40px; height: 40px; font-size: 14px; }
+
+  .titulo-cabecalho { font-size: 15px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .subtitulo-cabecalho { font-size: 12px; color: var(--texto-fraco); }
+
+  .acoes-cabecalho { display: flex; gap: 18px; color: var(--texto-fraco); font-size: 16px; flex-shrink: 0; }
 
   .lista-msgs {
     flex: 1;
@@ -145,18 +238,6 @@
     display: flex;
     flex-direction: column;
     gap: 4px;
-  }
-
-  .aviso-topo {
-    align-self: center;
-    background: #1a2340;
-    color: var(--texto-fraco);
-    font-size: 11.5px;
-    padding: 6px 12px;
-    border-radius: 8px;
-    margin-bottom: 8px;
-    text-align: center;
-    max-width: 90%;
   }
 
   .linha-msg { display: flex; flex-direction: column; margin-bottom: 2px; }
@@ -173,17 +254,19 @@
     white-space: pre-wrap;
   }
 
-  .propria .bolha { background: var(--verde-fundo); color: #06210f; border-bottom-right-radius: 3px; }
+  .propria .bolha { background: var(--acento-fundo); color: #ffffff; border-bottom-right-radius: 3px; }
   .outra .bolha { background: var(--painel2); color: var(--texto); border-bottom-left-radius: 3px; border: 1px solid var(--borda); }
-
 
   .barra-input {
     display: flex;
     align-items: flex-end;
-    gap: 8px;
-    padding: 10px;
+    gap: 10px;
+    padding: 12px 16px;
     border-top: 1px solid var(--borda);
   }
+
+  .icone-input { background: transparent; border: none; color: var(--texto-fraco); font-size: 18px; cursor: pointer; padding: 6px; flex-shrink: 0; }
+  .icone-input:hover { color: var(--texto); }
 
   .barra-input textarea {
     flex: 1;
@@ -198,23 +281,23 @@
     color: var(--texto);
   }
 
-  .barra-input textarea:focus { outline: none; border-color: var(--verde); }
+  .barra-input textarea:focus { outline: none; border-color: var(--acento); }
 
   .btn-enviar {
     width: 38px; height: 38px; border-radius: 50%;
-    background: var(--verde-fundo); border: none; color: #06210f;
+    background: var(--acento-fundo); border: none; color: #ffffff;
     font-size: 16px; cursor: pointer; flex-shrink: 0;
     display: flex; align-items: center; justify-content: center;
+  }
+
+  @media (max-width: 720px) {
+    .nav-lateral { display: none; }
+    .coluna-contatos { width: 220px; }
   }
 </style>
 </head>
 <body>
 <div class="pagina">
-
-  <div class="marca">
-    <div class="icone">🔥</div>
-    <div class="nome">Workspace<span>Chat interno</span></div>
-  </div>
 
   <div class="tela-sala" id="tela-sala">
     <div class="campo">
@@ -229,17 +312,47 @@
     <p class="dica-sala">As duas precisam digitar exatamente o mesmo nome de sala pra caírem na mesma conversa.</p>
   </div>
 
-  <div class="tela-chat" id="tela-chat">
-    <div class="barra-status">
-      <span class="sala-atual"><span class="bolinha-status" id="bolinha-status"></span>sala: <b id="rotulo-sala"></b></span>
-      <button class="btn-sair" onclick="sairDaSala()">Trocar de sala</button>
-    </div>
-    <div class="caixa-chat">
-      <div class="lista-msgs" id="lista-msgs">
-        <div class="aviso-topo">Este chat não guarda histórico.</div>
+  <div class="app tela-chat" id="tela-chat">
+    <div class="nav-lateral">
+      <div class="nav-icones">
+        <button class="nav-icone ativo" title="Conversas">💬</button>
+        <button class="nav-icone" title="Chamadas">📞</button>
+        <button class="nav-icone" title="Status">⊕</button>
       </div>
+      <div class="nav-rodape">
+        <button class="nav-icone" title="Trocar de sala" onclick="sairDaSala()">⚙️</button>
+        <div class="avatar nav-avatar" id="avatar-proprio" onclick="sairDaSala()" title="Trocar de sala"></div>
+      </div>
+    </div>
+
+    <div class="coluna-contatos">
+      <div class="cabecalho-contatos">
+        <h2>Conversas</h2>
+        <button class="icone-topo" onclick="sairDaSala()" title="Trocar de sala">⋯</button>
+      </div>
+      <div class="busca-contatos">
+        <input type="text" id="busca-participante" placeholder="Buscar...">
+      </div>
+      <div class="lista-participantes" id="lista-participantes"></div>
+    </div>
+
+    <div class="coluna-chat">
+      <div class="cabecalho-chat">
+        <div class="info-cabecalho">
+          <div class="avatar" id="avatar-cabecalho"></div>
+          <div>
+            <div class="titulo-cabecalho">Chat interno</div>
+            <div class="subtitulo-cabecalho" id="subtitulo-cabecalho">0 online</div>
+          </div>
+        </div>
+        <div class="acoes-cabecalho">
+          <span>🔍</span>
+        </div>
+      </div>
+      <div class="lista-msgs" id="lista-msgs"></div>
       <div class="barra-input">
-        <textarea id="campo-texto" rows="1" placeholder="Digite sua mensagem..."></textarea>
+        <button class="icone-input">🙂</button>
+        <textarea id="campo-texto" rows="1" placeholder="Digite uma mensagem"></textarea>
         <button class="btn-enviar" onclick="enviarMsg()">➤</button>
       </div>
     </div>
@@ -252,6 +365,30 @@
   let idSessao = Math.random().toString(36).slice(2, 8);
   let meuNome = '';
   let salaAtual = '';
+  let presenceBase = '';
+  let presenceOwn = '';
+  let heartbeatTimer = null;
+  let pruneTimer = null;
+  let participanteSelecionado = null;
+
+  const participantes = new Map(); // sid -> { nome, ts, ultimaMsg }
+
+  function corParaNome(nome) {
+    let hash = 0;
+    for (let i = 0; i < nome.length; i++) hash = nome.charCodeAt(i) + ((hash << 5) - hash);
+    return 'hsl(' + (Math.abs(hash) % 360) + ', 60%, 45%)';
+  }
+
+  function iniciaisDe(nome) {
+    const partes = nome.trim().split(/\s+/);
+    if (partes.length === 1) return partes[0].slice(0, 2).toUpperCase();
+    return (partes[0][0] + partes[partes.length - 1][0]).toUpperCase();
+  }
+
+  function aplicarAvatar(el, nome) {
+    el.textContent = iniciaisDe(nome);
+    el.style.background = corParaNome(nome);
+  }
 
   function entrarNaSala() {
     const sala = document.getElementById('nome-sala').value.trim();
@@ -263,54 +400,154 @@
     meuNome = nome;
     salaAtual = sala;
 
-    document.getElementById('rotulo-sala').textContent = sala;
+    participantes.clear();
+    participantes.set(idSessao, { nome: meuNome, ts: Date.now(), ultimaMsg: '' });
+
+    aplicarAvatar(document.getElementById('avatar-proprio'), meuNome);
+    aplicarAvatar(document.getElementById('avatar-cabecalho'), salaAtual);
+
     document.getElementById('tela-sala').classList.add('esconder');
     document.getElementById('tela-chat').classList.add('mostrar');
 
+    renderizarParticipantes();
     conectar();
   }
 
   function sairDaSala() {
-    if (cliente) { cliente.end(true); cliente = null; }
+    if (cliente) {
+      if (presenceOwn) cliente.publish(presenceOwn, '', { retain: true });
+      cliente.end(true);
+      cliente = null;
+    }
+    if (heartbeatTimer) { clearInterval(heartbeatTimer); heartbeatTimer = null; }
+    if (pruneTimer) { clearInterval(pruneTimer); pruneTimer = null; }
+    participantes.clear();
+    participanteSelecionado = null;
+
     document.getElementById('tela-chat').classList.remove('mostrar');
     document.getElementById('tela-sala').classList.remove('esconder');
-    document.getElementById('lista-msgs').innerHTML = '<div class="aviso-topo">Este chat não guarda histórico.</div>';
-    atualizarStatus(false);
+    document.getElementById('lista-msgs').innerHTML = '';
+    document.getElementById('lista-participantes').innerHTML = '';
   }
 
-  function atualizarStatus(online) {
-    document.getElementById('bolinha-status').classList.toggle('online', online);
+  function renderizarParticipantes() {
+    const lista = document.getElementById('lista-participantes');
+    const filtro = (document.getElementById('busca-participante').value || '').trim().toLowerCase();
+
+    const itens = Array.from(participantes.entries())
+      .filter(([, p]) => p.nome.toLowerCase().includes(filtro))
+      .sort((a, b) => b[1].ts - a[1].ts);
+
+    lista.innerHTML = '';
+
+    if (itens.length === 0) {
+      const vazio = document.createElement('div');
+      vazio.className = 'vazio-participantes';
+      vazio.textContent = 'Ninguém encontrado.';
+      lista.appendChild(vazio);
+    }
+
+    itens.forEach(([sid, p]) => {
+      const item = document.createElement('div');
+      item.className = 'item-participante' + (sid === participanteSelecionado ? ' ativo' : '');
+      item.onclick = () => { participanteSelecionado = sid; renderizarParticipantes(); };
+
+      const avatar = document.createElement('div');
+      avatar.className = 'avatar';
+      aplicarAvatar(avatar, p.nome);
+
+      const texto = document.createElement('div');
+      texto.className = 'texto-participante';
+
+      const nomeEl = document.createElement('div');
+      nomeEl.className = 'nome-participante';
+      nomeEl.textContent = p.nome + (sid === idSessao ? ' (você)' : '');
+
+      const msgEl = document.createElement('div');
+      msgEl.className = 'ultima-msg';
+      msgEl.textContent = p.ultimaMsg || 'Sem mensagens ainda';
+
+      texto.appendChild(nomeEl);
+      texto.appendChild(msgEl);
+      item.appendChild(avatar);
+      item.appendChild(texto);
+      lista.appendChild(item);
+    });
+
+    const sub = document.getElementById('subtitulo-cabecalho');
+    sub.textContent = participantes.size + (participantes.size === 1 ? ' pessoa online' : ' pessoas online');
   }
 
   function conectar() {
-    atualizarStatus(false);
     const topico = 'igreen-mensagens-secretas/' + encodeURIComponent(salaAtual);
+    presenceBase = 'igreen-mensagens-secretas/presenca/' + encodeURIComponent(salaAtual);
+    presenceOwn = presenceBase + '/' + idSessao;
+
     cliente = mqtt.connect('wss://broker.emqx.io:8084/mqtt', {
       clientId: 'ms_' + idSessao + '_' + Date.now(),
       clean: true,
-      reconnectPeriod: 2000
+      reconnectPeriod: 2000,
+      will: { topic: presenceOwn, payload: '', qos: 0, retain: true }
     });
 
     cliente.on('connect', () => {
-      atualizarStatus(true);
       cliente.subscribe(topico);
+      cliente.subscribe(presenceBase + '/+');
+      publicarPresenca();
+
+      if (heartbeatTimer) clearInterval(heartbeatTimer);
+      heartbeatTimer = setInterval(publicarPresenca, 25000);
+
+      if (pruneTimer) clearInterval(pruneTimer);
+      pruneTimer = setInterval(() => {
+        const limite = Date.now() - 60000;
+        let mudou = false;
+        participantes.forEach((p, sid) => {
+          if (sid !== idSessao && p.ts < limite) { participantes.delete(sid); mudou = true; }
+        });
+        if (mudou) renderizarParticipantes();
+      }, 15000);
     });
 
-    cliente.on('reconnect', () => atualizarStatus(false));
-    cliente.on('close', () => atualizarStatus(false));
-
     cliente.on('message', (topicoRecebido, payload) => {
+      if (topicoRecebido.indexOf(presenceBase + '/') === 0) {
+        const sid = topicoRecebido.slice((presenceBase + '/').length);
+        if (sid === idSessao) return;
+        if (!payload || payload.length === 0) {
+          participantes.delete(sid);
+        } else {
+          try {
+            const dados = JSON.parse(payload.toString());
+            const atual = participantes.get(sid) || {};
+            participantes.set(sid, { nome: dados.nome, ts: dados.ts || Date.now(), ultimaMsg: atual.ultimaMsg || '' });
+          } catch (e) {}
+        }
+        renderizarParticipantes();
+        return;
+      }
+
       try {
         const dados = JSON.parse(payload.toString());
         if (dados.sessao === idSessao) return;
         adicionarBolha(dados.texto, 'outra', dados.nome);
+
+        const atual = participantes.get(dados.sessao);
+        if (atual) {
+          atual.ultimaMsg = dados.texto;
+        } else {
+          participantes.set(dados.sessao, { nome: dados.nome, ts: Date.now(), ultimaMsg: dados.texto });
+        }
+        renderizarParticipantes();
       } catch (e) {}
     });
   }
 
-  function horaAtual() {
-    const d = new Date();
-    return d.getHours().toString().padStart(2,'0') + ':' + d.getMinutes().toString().padStart(2,'0');
+  function publicarPresenca() {
+    if (!cliente) return;
+    const p = participantes.get(idSessao) || { nome: meuNome };
+    p.ts = Date.now();
+    participantes.set(idSessao, p);
+    cliente.publish(presenceOwn, JSON.stringify({ nome: meuNome, ts: p.ts }), { retain: true });
   }
 
   function adicionarBolha(texto, lado, nomeRemetente) {
@@ -324,7 +561,6 @@
     bolha.textContent = (lado === 'outra' && nomeRemetente ? nomeRemetente + ': ' : '') + texto;
 
     linha.appendChild(bolha);
-
     lista.appendChild(linha);
     lista.scrollTop = lista.scrollHeight;
 
@@ -344,6 +580,9 @@
     cliente.publish(topico, JSON.stringify({ texto: valor, nome: meuNome, sessao: idSessao }));
     adicionarBolha(valor, 'propria', null);
 
+    const p = participantes.get(idSessao);
+    if (p) { p.ultimaMsg = valor; renderizarParticipantes(); }
+
     campo.value = '';
     campo.style.height = 'auto';
   }
@@ -355,6 +594,12 @@
   document.getElementById('campo-texto').addEventListener('input', function() {
     this.style.height = 'auto';
     this.style.height = Math.min(this.scrollHeight, 80) + 'px';
+  });
+
+  document.getElementById('busca-participante').addEventListener('input', renderizarParticipantes);
+
+  window.addEventListener('beforeunload', () => {
+    if (cliente && presenceOwn) cliente.publish(presenceOwn, '', { retain: true });
   });
 </script>
 </body>
