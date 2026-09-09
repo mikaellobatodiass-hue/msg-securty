@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Mensagens Secretas</title>
+<title>Workspace</title>
 <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
 <style>
   :root {
@@ -176,7 +176,6 @@
   .propria .bolha { background: var(--verde-fundo); color: #06210f; border-bottom-right-radius: 3px; }
   .outra .bolha { background: var(--painel2); color: var(--texto); border-bottom-left-radius: 3px; border: 1px solid var(--borda); }
 
-  .contagem { font-size: 10px; color: var(--texto-fraco); margin-top: 2px; }
 
   .barra-input {
     display: flex;
@@ -214,13 +213,13 @@
 
   <div class="marca">
     <div class="icone">🔥</div>
-    <div class="nome">Workspace<span>Mensagens Secretas</span></div>
+    <div class="nome">Workspace<span>Chat interno</span></div>
   </div>
 
   <div class="tela-sala" id="tela-sala">
     <div class="campo">
       <label>NOME DA SALA</label>
-      <input type="text" id="nome-sala" placeholder="ex: girassol-secreto">
+      <input type="text" id="nome-sala" placeholder="ex: projeto-alpha">
     </div>
     <div class="campo">
       <label>SEU NOME (só pra você reconhecer suas msgs)</label>
@@ -237,7 +236,7 @@
     </div>
     <div class="caixa-chat">
       <div class="lista-msgs" id="lista-msgs">
-        <div class="aviso-topo">Mensagens somem 15s depois de aparecer pra quem tá vendo.</div>
+        <div class="aviso-topo">Este chat não guarda histórico.</div>
       </div>
       <div class="barra-input">
         <textarea id="campo-texto" rows="1" placeholder="Digite sua mensagem..."></textarea>
@@ -275,7 +274,7 @@
     if (cliente) { cliente.end(true); cliente = null; }
     document.getElementById('tela-chat').classList.remove('mostrar');
     document.getElementById('tela-sala').classList.remove('esconder');
-    document.getElementById('lista-msgs').innerHTML = '<div class="aviso-topo">Mensagens somem 15s depois de aparecer pra quem tá vendo.</div>';
+    document.getElementById('lista-msgs').innerHTML = '<div class="aviso-topo">Este chat não guarda histórico.</div>';
     atualizarStatus(false);
   }
 
@@ -326,26 +325,14 @@
 
     linha.appendChild(bolha);
 
-    const contagem = document.createElement('div');
-    contagem.className = 'contagem';
-    contagem.textContent = 'some em 15s';
-    linha.appendChild(contagem);
-
     lista.appendChild(linha);
     lista.scrollTop = lista.scrollHeight;
 
-    let restante = 15;
-    const timer = setInterval(() => {
-      restante -= 1;
-      if (restante > 0) {
-        contagem.textContent = 'some em ' + restante + 's';
-      } else {
-        clearInterval(timer);
-        linha.style.transition = 'opacity 0.5s ease';
-        linha.style.opacity = '0';
-        setTimeout(() => linha.remove(), 500);
-      }
-    }, 1000);
+    setTimeout(() => {
+      linha.style.transition = 'opacity 0.5s ease';
+      linha.style.opacity = '0';
+      setTimeout(() => linha.remove(), 500);
+    }, 15000);
   }
 
   function enviarMsg() {
